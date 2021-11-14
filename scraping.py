@@ -17,10 +17,10 @@ def scrape_all():
         "news_paragraph": news_paragraph,
         "featured_image": featured_image(browser),
         "facts": mars_facts(),
-        "last_modified": dt.datetime.now()
+        "last_modified": dt.datetime.now(),
+        "hemispheres": scrape_hemi(browser)    
     }
-    # Stop webdriver and return data
-    browser.quit()
+
     return data
 
 
@@ -90,9 +90,50 @@ def mars_facts():
     return df.to_html()
    
 
+def scrape_hemi(browser):
+    # # D1: Scrape High-Resolution Mars’ Hemisphere Images and Titles
+    # ### Hemispheres
+
+    # 1. Use browser to visit the URL 
+    url = 'https://marshemispheres.com/'
+
+    browser.visit(url)
 
 
+    # 2. Create a list to hold the images and titles.
+    hemispheres=[]
+    # 3. Write code to retrieve the image urls and titles for each hemisphere.
+    html = browser.html
+    img_soup = soup(html, 'html.parser')
+    #parse html on the images page https://marshemispheres.com/ into img_soup make a list items that has the link URL to the higher res images and titles
+    items=img_soup.findAll('a', class_='itemLink product-item')
 
+    dictionary={}
 
+    #loop through this items list to leave the main page go to the high res page get images and titles then back
+    for item in items:
+        try:  
+            #get path to high res photo 
+            full_image_page_url =url+ item.get('href')
+            
+            #browse to the site
+            browser.visit(full_image_page_url)
+            html = browser.html
+            #parse into img_soup to enable finding title and high res link
+            img_soup = soup(html, 'html.parser')
+            hemisphere_image_url='https://marshemispheres.com/' + img_soup.find('img', class_='wide-image').get('src')
+            title=img_soup.find('h2',class_='title').get_text()
+            
+            #create dictionary 
+            dictionary={'img_url':hemisphere_image_url, 'title':title}
+            
+            #make a list of dictionary URLs and titles found.
+            if dictionary not in hemispheres:
+                hemispheres.append(dictionary)
 
-
+            #return to the main map to 
+            url = 'https://marshemispheres.com/'
+            browser.visit(url)
+        except BaseException:
+            return hemispheres
+    return hemispheres
