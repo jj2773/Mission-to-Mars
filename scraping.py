@@ -87,7 +87,7 @@ def mars_facts():
     df.set_index('description', inplace=True)
     
     #conver the dataframe to html format, add bootstrap
-    return df.to_html()
+    return df.to_html(classes=["table-bordered", "table-striped", "table-hover"])
    
 
 def scrape_hemi(browser):
